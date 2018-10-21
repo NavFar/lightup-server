@@ -18,14 +18,12 @@ router.post('/register', function(req, res) {
   User.create({
     name : req.body.name,
     username : req.body.username,
-    password : hashedPassword
+    password : hashedPassword,
+    role : 'user'
   },
   function (err, user) {
     if (err) return res.status(500).send("There was a problem registering the user.")
-    var token = jwt.sign({ id: user._id }, authConfig.secret, {
-      expiresIn: 86400
-    });
-    res.status(200).send({ token: token });
+    res.status(200).send({'stat':'ok'});
   });
 });
 //           _  __
