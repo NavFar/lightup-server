@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var User = require('../models/User')
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcryptjs');
 var authConfig = require('../configs/authConfig');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -38,7 +40,16 @@ router.post('/self', function(req, res) {
   jwt.verify(token, authConfig.secret, function(err, decoded) {
     if (err) return res.status(500).send({ message: 'Failed to authenticate token.' });
 
-    res.status(200).send(decoded);
+    User.findById(decoded.id, function (err, user) {
+      if (err) return res.status(500).send("There was a problem finding the user.");
+      if (!user) return res.status(404).send("No user found.");
+
+      res.status(200).send({
+        'name':user.name,
+        'username':user.username
+      });
+    });
+
   });
 });
 
