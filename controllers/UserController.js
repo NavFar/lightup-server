@@ -31,7 +31,7 @@ router.post('/register', function(req, res) {
 // / __|/ _ \ | |_
 // \__ \  __/ |  _|
 // |___/\___|_|_|
-router.get('/self', function(req, res) {
+router.post('/self', function(req, res) {
   var token = req.headers['x-access-token'];
   if (!token) return res.status(401).send({message: 'No token provided.' });
 
