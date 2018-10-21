@@ -34,7 +34,6 @@ router.post('/register', function(req, res) {
 router.post('/self', function(req, res) {
   var token = req.headers['x-access-token'];
   if (!token) return res.status(401).send({message: 'No token provided.' });
-
   jwt.verify(token, authConfig.secret, function(err, decoded) {
     if (err) return res.status(500).send({ message: 'Failed to authenticate token.' });
 
@@ -49,5 +48,26 @@ router.post('/self', function(req, res) {
     });
   });
 });
+//
+//  _                _
+// | |    ___   __ _(_)_ __
+// | |   / _ \ / _` | | '_ \
+// | |__| (_) | (_| | | | | |
+// |_____\___/ \__, |_|_| |_|
+//            |___/
+router.post('/login', function(req, res) {
+  User.findOne({ username: req.body.username }, function (err, user) {
+    if (err) return res.status(500).send('Error on the server.');
+    if (!user) return res.status(404).send('No user found.');
+    var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
+    if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
+    var token = jwt.sign({ id: user._id }, authConfig.secret, {
+      expiresIn: 86400 // expires in 24 hours
+    });
+    res.status(200).send({ token: token });
+  });
+});
+
+
 
 module.exports = router;
