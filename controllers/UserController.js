@@ -49,7 +49,6 @@ router.post('/self', function(req, res) {
         'username':user.username
       });
     });
-
   });
 });
 
