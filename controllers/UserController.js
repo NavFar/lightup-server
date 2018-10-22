@@ -16,11 +16,11 @@ router.use(bodyParser.json());
 router.post('/register', function(req, res) {
 
   if(!req.body.password || !req.body.username|| !req.body.name)
-    res.status(400).send();
+    return res.status(400).send();
   if(!res.locals.user)
-    res.status(401).send();
+    return res.status(401).send();
   if(res.locals.user.role!="admin")
-    res.status(403).send();
+    return res.status(403).send();
     User.findOne({username:req.body.username},function(err,user){
       if(user)
       return res.status(400).send({message: 'duplicate' });
@@ -34,7 +34,7 @@ router.post('/register', function(req, res) {
           },
           function (err, user) {
             if (err) return res.status(500).send("There was a problem registering the user.")
-            res.status(200).send();
+            return res.status(200).send();
           });
       }
     });
@@ -61,7 +61,7 @@ router.post('/self', function(req, res) {
 //            |___/
 router.post('/login', function(req, res) {
   if(!req.body.password || !req.body.username)
-    res.status(400).send({ });
+    return res.status(400).send({ });
   User.findOne({ username: req.body.username }, function (err, user) {
     if (err) return res.status(500).send('Error on the server.');
     if (!user) return res.status(404).send('No user found.');
@@ -70,7 +70,7 @@ router.post('/login', function(req, res) {
     var token = jwt.sign({ id: user._id }, authConfig.secret, {
       expiresIn: 86400 // expires in 24 hours
     });
-    res.status(200).send({ token: token });
+    return res.status(200).send({ token: token });
   });
 });
 
@@ -87,7 +87,7 @@ router.post('/login', function(req, res) {
 // |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_|
 router.post('/changepassword', function(req, res) {
   if(!req.body.password || !req.body.newpassword)
-    res.status(400).send();
+    return res.status(400).send();
   if(!res.locals.user)
     return res.status(401).send();
   var passwordIsValid = bcrypt.compareSync(req.body.password, res.locals.user.password);
@@ -96,8 +96,8 @@ router.post('/changepassword', function(req, res) {
   res.locals.user.save(
     function (err, updateUser) {
       if(err)
-      res.status(500).send();
-      res.status(200).send();
+       return res.status(500).send();
+      return res.status(200).send();
     }
   );
 });
@@ -134,7 +134,24 @@ router.post('/allusers', function(req, res) {
    return res.status(200).send(response);
  });
 });
-
-
+//  ____       _      _         _   _
+// |  _ \  ___| | ___| |_ ___  | | | |___  ___ _ __
+// | | | |/ _ \ |/ _ \ __/ _ \ | | | / __|/ _ \ '__|
+// | |_| |  __/ |  __/ ||  __/ | |_| \__ \  __/ |
+// |____/ \___|_|\___|\__\___|  \___/|___/\___|_|
+//
+router.post('/deleteuser', function(req, res) {
+  if(!req.body.username)
+    return res.status(400).send();
+  if(!res.locals.user)
+    return res.status(401).send();
+  if(res.locals.user.role!="admin")
+    return res.status(406).send();
+  User.findOneAndRemove({'username':req.body.username},function(err){
+    if(err)
+      return res.status(500).send();
+    return res.status(200).send();
+  });
+});
 
 module.exports = router;
