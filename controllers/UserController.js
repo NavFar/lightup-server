@@ -14,17 +14,30 @@ router.use(bodyParser.json());
 // |_| \_\___|\__, |_|___/\__\___|_|
 //           |___/
 router.post('/register', function(req, res) {
-  var hashedPassword = bcrypt.hashSync(req.body.password, 8);
-  User.create({
-    name : req.body.name,
-    username : req.body.username,
-    password : hashedPassword,
-    role : 'user'
-  },
-  function (err, user) {
-    if (err) return res.status(500).send("There was a problem registering the user.")
-    res.status(200).send({'stat':'ok'});
-  });
+
+  if(!req.body.password || !req.body.username|| !req.body.name)
+    res.status(400).send();
+  if(!res.locals.user)
+    res.status(401).send();
+  if(res.locals.user.role!="admin")
+    res.status(403).send();
+    User.findOne({username:req.body.username},function(err,user){
+      if(user)
+      return res.status(400).send({message: 'duplicate' });
+      else {
+        var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+        User.create({
+            name : req.body.name,
+            username : req.body.username,
+            password : hashedPassword,
+            role : 'user'
+          },
+          function (err, user) {
+            if (err) return res.status(500).send("There was a problem registering the user.")
+            res.status(200).send();
+          });  
+      }
+    });
 });
 //           _  __
 //  ___  ___| |/ _|
@@ -32,20 +45,11 @@ router.post('/register', function(req, res) {
 // \__ \  __/ |  _|
 // |___/\___|_|_|
 router.post('/self', function(req, res) {
-  var token = req.headers['x-access-token'];
-  if (!token) return res.status(401).send({message: 'No token provided.' });
-  jwt.verify(token, authConfig.secret, function(err, decoded) {
-    if (err) return res.status(500).send({ message: 'Failed to authenticate token.' });
-
-    User.findById(decoded.id, function (err, user) {
-      if (err) return res.status(500).send("There was a problem finding the user.");
-      if (!user) return res.status(404).send("No user found.");
-
-      res.status(200).send({
-        'name':user.name,
-        'username':user.username
-      });
-    });
+  if(!res.locals.user)
+    return res.status(401).send();
+  res.status(200).send({
+    'name':res.locals.user.name,
+    'username':res.locals.user.username
   });
 });
 //
@@ -56,6 +60,8 @@ router.post('/self', function(req, res) {
 // |_____\___/ \__, |_|_| |_|
 //            |___/
 router.post('/login', function(req, res) {
+  if(!req.body.password || !req.body.username)
+    res.status(400).send({ });
   User.findOne({ username: req.body.username }, function (err, user) {
     if (err) return res.status(500).send('Error on the server.');
     if (!user) return res.status(404).send('No user found.');
@@ -67,7 +73,9 @@ router.post('/login', function(req, res) {
     res.status(200).send({ token: token });
   });
 });
-
+router.post('/test', function(req, res) {
+  res.send(res.locals);
+});
 
 
 module.exports = router;
