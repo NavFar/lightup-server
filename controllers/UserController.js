@@ -35,7 +35,7 @@ router.post('/register', function(req, res) {
           function (err, user) {
             if (err) return res.status(500).send("There was a problem registering the user.")
             res.status(200).send();
-          });  
+          });
       }
     });
 });
@@ -73,9 +73,47 @@ router.post('/login', function(req, res) {
     res.status(200).send({ token: token });
   });
 });
-router.post('/test', function(req, res) {
-  res.send(res.locals);
-});
 
+//  ____ _
+// / ___| |__   __ _ _ __   __ _  ___
+// | |   | '_ \ / _` | '_ \ / _` |/ _ \
+// | |___| | | | (_| | | | | (_| |  __/
+// \____|_| |_|\__,_|_| |_|\__, |\___|
+//                          |___/
+//  ____                                     _
+// |  _ \ __ _ ___ _____      _____  _ __ __| |
+// | |_) / _` / __/ __\ \ /\ / / _ \| '__/ _` |
+// |  __/ (_| \__ \__ \\ V  V / (_) | | | (_| |
+// |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_|
+router.post('/changepassword', function(req, res) {
+  if(!req.body.password || !req.body.newpassword)
+    res.status(400).send();
+  if(!res.locals.user)
+    return res.status(401).send();
+  var passwordIsValid = bcrypt.compareSync(req.body.password, res.locals.user.password);
+  if(!passwordIsValid)
+    return res.status(406).send();
+  res.locals.user.save(
+    function (err, updateUser) {
+      if(err)
+      res.status(500).send();
+      res.status(200).send();
+    }
+  );
+});
+//  ___          _       _           _
+// |_ _|___     / \   __| |_ __ ___ (_)_ __
+//  | |/ __|   / _ \ / _` | '_ ` _ \| | '_ \
+//  | |\__ \  / ___ \ (_| | | | | | | | | | |
+// |___|___/ /_/   \_\__,_|_| |_| |_|_|_| |_|
+//
+
+router.post('/isadmin', function(req, res) {
+  if(!res.locals.user)
+    return res.status(401).send();
+  if(res.locals.user.role=="admin")
+    return res.status(200).send({"admin":true});
+  return res.status(200).send({"admin":false});
+  });
 
 module.exports = router;
