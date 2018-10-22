@@ -5,6 +5,7 @@ var dbConfig = require('./configs/dbConfig');
 var mongoose = require('mongoose');
 // mongoose.connect('mongodb://'+dbConfig.user+':'+dbConfig.db_passowrd+'@'+dbConfig.db_url+':'+dbConfig.db_port+'/'+dbConfig.db_name);
 mongoose.connect('mongodb://'+dbConfig.db_url+':'+dbConfig.db_port+'/'+dbConfig.db_name,{ useNewUrlParser: true });
+app.all('*',require('./middlewares/Auth'));
 router.add(app);
 var portNumber = 3000;
 app.listen(portNumber,function()
