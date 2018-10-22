@@ -116,4 +116,25 @@ router.post('/isadmin', function(req, res) {
   return res.status(200).send({"admin":false});
   });
 
+//     _    _ _   _   _
+//    / \  | | | | | | |___  ___ _ __ ___
+//   / _ \ | | | | | | / __|/ _ \ '__/ __|
+//  / ___ \| | | | |_| \__ \  __/ |  \__ \
+// /_/   \_\_|_|  \___/|___/\___|_|  |___/
+router.post('/allusers', function(req, res) {
+  if(!res.locals.user)
+    return res.status(401).send();
+  if(res.locals.user.role!="admin")
+    return res.status(406).send();
+   User.find({},function(err,users)
+ {
+   var response=[];
+   for(var i =0;i<users.length;i++)
+    response.push({'name':users[i].name,'username':users[i].username});
+   return res.status(200).send(response);
+ });
+});
+
+
+
 module.exports = router;
