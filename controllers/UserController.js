@@ -121,7 +121,7 @@ router.post('/isadmin', function(req, res) {
 //   / _ \ | | | | | | / __|/ _ \ '__/ __|
 //  / ___ \| | | | |_| \__ \  __/ |  \__ \
 // /_/   \_\_|_|  \___/|___/\___|_|  |___/
-router.post('/allusers', function(req, res) {
+router.post('/all', function(req, res) {
   if(!res.locals.user)
     return res.status(401).send();
   if(res.locals.user.role!="admin")
@@ -140,7 +140,7 @@ router.post('/allusers', function(req, res) {
 // | |_| |  __/ |  __/ ||  __/ | |_| \__ \  __/ |
 // |____/ \___|_|\___|\__\___|  \___/|___/\___|_|
 //
-router.post('/deleteuser', function(req, res) {
+router.post('/delete', function(req, res) {
   if(!req.body.username)
     return res.status(400).send();
   if(!res.locals.user)
