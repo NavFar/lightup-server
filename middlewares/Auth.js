@@ -9,7 +9,7 @@ var bcrypt = require('bcryptjs');
 var authConfig = require('../configs/authConfig');
 var token = req.headers['x-access-token'];
 res.locals.auth=false;
-res.locals.admin=false;
+res.locals.user=null;
 if(token)
 {
   jwt.verify(token, authConfig.secret, function(err, decoded) {
@@ -19,7 +19,7 @@ if(token)
         if(!err&&user)
         {
           res.locals.auth=true;
-          res.locals.admin=(user.role=="admin");
+          res.locals.user=user;
         }
           next();
       });
