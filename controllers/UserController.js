@@ -93,6 +93,7 @@ router.post('/changepassword', function(req, res) {
   var passwordIsValid = bcrypt.compareSync(req.body.password, res.locals.user.password);
   if(!passwordIsValid)
     return res.status(406).send();
+  res.locals.user.password = bcrypt.hashSync(req.body.newpassword, 8);
   res.locals.user.save(
     function (err, updateUser) {
       if(err)
