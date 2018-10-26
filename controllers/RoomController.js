@@ -15,8 +15,8 @@ router.post('/all', function(req, res) {
     return res.status(400).send();
   if(!req.body.limit||isNaN(req.body.limit))
     return res.status(400).send();
-  // if(!res.locals.user)
-  //   return res.status(401).send();
+  if(!res.locals.user)
+    return res.status(401).send();
   // if(res.locals.user.role!="admin")
   //   return res.status(406).send();
     Room.find({}).skip(Number(req.body.offset)).limit(Number(req.body.limit)).exec(function(err,rooms)
