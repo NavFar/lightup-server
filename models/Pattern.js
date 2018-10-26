@@ -2,6 +2,7 @@ var mongoose =require('mongoose');
 var Schema = mongoose.Schema;
 var patternSchema = new  mongoose.Schema({
 name:String,
+active:Boolean,
 criteria:[
   {
     id:String,
