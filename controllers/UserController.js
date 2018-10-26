@@ -147,11 +147,30 @@ router.post('/delete', function(req, res) {
     return res.status(401).send();
   if(res.locals.user.role!="admin")
     return res.status(406).send();
+  if(req.body.username==rex.locals.user.username)
+    return res.status(400).send();
   User.findOneAndRemove({'username':req.body.username},function(err){
     if(err)
       return res.status(500).send();
     return res.status(200).send();
   });
 });
+//  _   _                  ____                  _
+// | | | |___  ___ _ __   / ___|___  _   _ _ __ | |_
+// | | | / __|/ _ \ '__| | |   / _ \| | | | '_ \| __|
+// | |_| \__ \  __/ |    | |__| (_) | |_| | | | | |_
+//  \___/|___/\___|_|     \____\___/ \__,_|_| |_|\__|
+router.post('/count', function(req, res) {
+  if(!res.locals.user)
+    return res.status(401).send();
+  if(res.locals.user.role!="admin")
+    return res.status(406).send();
+  User.countDocuments({},function(err,count){
+    if(err)
+      return res.status(500).send();
+    return res.status(200).send({count:count});
+  });
+});
+
 
 module.exports = router;
