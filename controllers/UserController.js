@@ -122,12 +122,18 @@ router.post('/isadmin', function(req, res) {
 //  / ___ \| | | | |_| \__ \  __/ |  \__ \
 // /_/   \_\_|_|  \___/|___/\___|_|  |___/
 router.post('/all', function(req, res) {
+  if(!req.body.offset||isNaN(req.body.offset))
+    return res.status(400).send();
+    if(!req.body.limit||isNaN(req.body.limit))
+      return res.status(400).send();
   if(!res.locals.user)
     return res.status(401).send();
   if(res.locals.user.role!="admin")
     return res.status(406).send();
-   User.find({},function(err,users)
+   User.find({}).skip(Number(req.body.offset)).limit(Number(req.body.limit)).exec(function(err,users)
  {
+   if(err)
+    return res.status(500).send();
    var response=[];
    for(var i =0;i<users.length;i++)
     response.push({'name':users[i].name,'username':users[i].username});
