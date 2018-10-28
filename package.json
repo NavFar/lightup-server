@@ -4,6 +4,8 @@
   "description": "Server for lightUp project",
   "main": "index.js",
   "scripts": {
+    "demo": "nodejs server.js --noWatcher",
+    "start": "nodejs server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Navid Farahmand",
