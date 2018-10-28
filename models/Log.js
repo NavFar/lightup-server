@@ -1,9 +1,8 @@
 var mongoose =require('mongoose');
 var Schema = mongoose.Schema;
 var logSchema = new  mongoose.Schema({
-	date: Date,
+	date: String,
   message:String,
-	author: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 mongoose.model('Log',logSchema);
 
