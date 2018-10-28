@@ -5,6 +5,8 @@ var User = require('../models/User')
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var authConfig = require('../configs/authConfig');
+var Log = require('../models/Log')
+
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 //  ____            _     _
@@ -33,7 +35,12 @@ router.post('/register', function(req, res) {
             role : 'user'
           },
           function (err, user) {
-            if (err) return res.status(500).send("There was a problem registering the user.")
+            if (err) return res.status(500).send("There was a problem registering the user.");
+
+            Log.create({
+                date : new Date().getUTCFullYear()+" / "+(new Date().getUTCMonth() + 1)+" / " +new Date().getUTCDate(),
+                message : "User "+req.body.username+" added",
+              },function (err, log) {});
             return res.status(200).send();
           });
       }
@@ -63,8 +70,8 @@ router.post('/login', function(req, res) {
   if(!req.body.password || !req.body.username)
     return res.status(400).send({ });
   User.findOne({ username: req.body.username }, function (err, user) {
-    if (err) return res.status(500).send('Error on the server.');
-    if (!user) return res.status(404).send('No user found.');
+    if (err) return res.status(500).send();
+    if (!user) return res.status(401).send();
     var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
     if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
     var token = jwt.sign({ id: user._id }, authConfig.secret, {
@@ -123,10 +130,10 @@ router.post('/isadmin', function(req, res) {
 //  / ___ \| | | | |_| \__ \  __/ |  \__ \
 // /_/   \_\_|_|  \___/|___/\___|_|  |___/
 router.post('/all', function(req, res) {
-  if(!req.body.offset||isNaN(req.body.offset))
+  if(isNaN(req.body.offset))
     return res.status(400).send();
-    if(!req.body.limit||isNaN(req.body.limit))
-      return res.status(400).send();
+  if(isNaN(req.body.limit))
+    return res.status(400).send();
   if(!res.locals.user)
     return res.status(401).send();
   if(res.locals.user.role!="admin")
@@ -137,8 +144,8 @@ router.post('/all', function(req, res) {
     return res.status(500).send();
    var response=[];
    for(var i =0;i<users.length;i++)
-    response.push({'name':users[i].name,'username':users[i].username});
-   return res.status(200).send(response);
+    response.push({'name':users[i].name,'username':users[i].username ,id:users[i]._id});
+   return res.status(200).send({users:response});
  });
 });
 //  ____       _      _         _   _
@@ -148,15 +155,15 @@ router.post('/all', function(req, res) {
 // |____/ \___|_|\___|\__\___|  \___/|___/\___|_|
 //
 router.post('/delete', function(req, res) {
-  if(!req.body.username)
+  if(!req.body.id)
     return res.status(400).send();
   if(!res.locals.user)
     return res.status(401).send();
   if(res.locals.user.role!="admin")
     return res.status(406).send();
-  if(req.body.username==rex.locals.user.username)
+  if(req.body.id==res.locals.user._id)
     return res.status(400).send();
-  User.findOneAndRemove({'username':req.body.username},function(err){
+  User.findOneAndRemove({'_id':req.body.id},function(err){
     if(err)
       return res.status(500).send();
     return res.status(200).send();
